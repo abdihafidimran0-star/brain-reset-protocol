@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abdixafid · Daily Schedule</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:         #0C0F14;
+    --surface:    #131820;
+    --border:     #1E2530;
+    --gold:       #C9A84C;
+    --gold-dim:   #7A6328;
+    --gold-glow:  rgba(201,168,76,0.10);
+    --quran:      #8B5CF6;
+    --quran-glow: rgba(139,92,246,0.12);
+    --body-col:   #10B981;
+    --body-glow:  rgba(16,185,129,0.10);
+    --mind:       #3B82F6;
+    --mind-glow:  rgba(59,130,246,0.10);
+    --work:       #64748B;
+    --work-glow:  rgba(100,116,139,0.10);
+    --text:       #E8EDF3;
+    --muted:      #6B7685;
+    --dim:        #3A4452;
+    --spine:      #1E2B3A;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+
+  /* HEADER */
+  .header {
+    padding: 32px 20px 24px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 70% 100% at 50% -10%, rgba(139,92,246,0.06) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .eyebrow {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(24px, 6vw, 38px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    line-height: 1.1;
+  }
+  .header-sub {
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* TOGGLE */
+  .toggle-wrap {
+    display: flex;
+    justify-content: center;
+    padding: 20px 20px 0;
+    gap: 8px;
+  }
+  .toggle-btn {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 22px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: all 0.18s;
+  }
+  .toggle-btn.active-work {
+    background: rgba(59,130,246,0.12);
+    border-color: rgba(59,130,246,0.4);
+    color: #60A5FA;
+  }
+  .toggle-btn.active-off {
+    background: rgba(201,168,76,0.10);
+    border-color: rgba(201,168,76,0.35);
+    color: var(--gold);
+  }
+
+  /* LEGEND */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    padding: 16px 20px 0;
+  }
+  .leg {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .leg-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* TIMELINE */
+  .timeline-container {
+    max-width: 680px;
+    margin: 28px auto 0;
+    padding: 0 16px;
+    position: relative;
+  }
+  .timeline-container::before {
+    content: '';
+    position: absolute;
+    left: calc(16px + 52px);
+    top: 0; bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, var(--spine) 5%, var(--spine) 95%, transparent);
+  }
+  .schedule-view { display: none; }
+  .schedule-view.active { display: block; }
+
+  /* BLOCK */
+  .block {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 6px;
+    position: relative;
+  }
+  .time-col {
+    width: 52px;
+    flex-shrink: 0;
+    text-align: right;
+    padding-right: 16px;
+    padding-top: 14px;
+  }
+  .time-label {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    line-height: 1;
+  }
+  .time-label small {
+    display: block;
+    font-size: 9px;
+    font-weight: 500;
+    color: var(--dim);
+    margin-top: 2px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .node {
+    position: absolute;
+    left: calc(52px - 5px);
+    top: 18px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--bg);
+    z-index: 2;
+  }
+  .card-col { flex: 1; padding-left: 20px; }
+  .block-card {
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    padding: 13px 16px;
+    background: var(--surface);
+    transition: border-color 0.15s;
+  }
+  .block-card:hover { border-color: var(--dim); }
+  .block-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+    margin-bottom: 3px;
+  }
+  .block-desc {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+  .block-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 7px;
+  }
+  .tag {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  /* Zone colours */
+  .zone-deen   { background: var(--gold-glow);   border: 1px solid rgba(201,168,76,0.2);  color: var(--gold); }
+  .zone-quran  { background: var(--quran-glow);  border: 1px solid rgba(139,92,246,0.25); color: var(--quran); }
+  .zone-body   { background: var(--body-glow);   border: 1px solid rgba(16,185,129,0.25); color: var(--body-col); }
+  .zone-mind   { background: var(--mind-glow);   border: 1px solid rgba(59,130,246,0.25); color: var(--mind); }
+  .zone-work   { background: var(--work-glow);   border: 1px solid rgba(100,116,139,0.2); color: #94A3B8; }
+  .zone-rest   { background: rgba(15,23,35,0.6); border: 1px solid #1E293B;               color: #475569; }
+  .zone-sleep  { background: rgba(15,23,35,0.6); border: 1px solid #1E293B;               color: #475569; }
+
+  /* Node colours */
+  .nd-deen  { background: var(--gold);     box-shadow: 0 0 6px var(--gold); }
+  .nd-quran { background: var(--quran);    box-shadow: 0 0 6px var(--quran); }
+  .nd-body  { background: var(--body-col); box-shadow: 0 0 6px var(--body-col); }
+  .nd-mind  { background: var(--mind);     box-shadow: 0 0 6px var(--mind); }
+  .nd-work  { background: var(--work); }
+  .nd-rest  { background: #1E293B; }
+  .nd-sleep { background: #1E293B; }
+
+  /* Card accents */
+  .acc-deen  { border-left: 3px solid var(--gold); }
+  .acc-quran { border-left: 3px solid var(--quran); }
+  .acc-body  { border-left: 3px solid var(--body-col); }
+  .acc-mind  { border-left: 3px solid var(--mind); }
+  .acc-work  { border-left: 3px solid #475569; }
+  .acc-rest  { border-left: 3px solid #1E293B; }
+  .acc-sleep { border-left: 3px solid #1E293B; }
+
+  /* Tier box */
+  .tier-box {
+    background: #0F1520;
+    border: 1px solid rgba(139,92,246,0.2);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-top: 8px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .tier {
+    border-radius: 6px;
+    padding: 8px 10px;
+    background: rgba(139,92,246,0.06);
+    border: 1px solid rgba(139,92,246,0.15);
+  }
+  .tier-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--quran);
+    margin-bottom: 3px;
+  }
+  .tier-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
+
+  /* Divider */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 14px 0 8px;
+    padding-left: 72px;
+  }
+  .divider-label {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dim);
+    white-space: nowrap;
+  }
+  .divider-line { flex: 1; height: 1px; background: var(--border); }
+
+  /* Quote */
+  .quote {
+    text-align: center;
+    padding: 36px 20px 0;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  .quote-ar { font-size: 18px; color: var(--gold); line-height: 1.9; margin-bottom: 8px; }
+  .quote-en { font-size: 12px; color: var(--muted); line-height: 1.6; font-style: italic; }
+
+  @media (max-width: 480px) {
+    .tier-box { grid-template-columns: 1fr; }
+    .timeline-container::before { left: calc(16px + 44px); }
+    .node { left: calc(44px - 5px); }
+    .time-col { width: 44px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <p class="eyebrow">30-Day Brain Reset · Abdixafid</p>
+  <h1>Daily Schedule</h1>
+  <p class="header-sub">Workdays Mon–Wed, Sat–Sun &nbsp;·&nbsp; Off-days Thu–Fri</p>
+</div>
+
+<div class="toggle-wrap">
+  <button class="toggle-btn active-work" id="btnWork" onclick="show('work')">⚡ Workday</button>
+  <button class="toggle-btn" id="btnOff" onclick="show('off')">🌙 Off-Day</button>
+</div>
+
+<div class="legend">
+  <div class="leg"><div class="leg-dot" style="background:var(--gold)"></div>Deen</div>
+  <div class="leg"><div class="leg-dot" style="background:var(--quran)"></div>Qur'an</div>
+  <div class="leg"><div class="leg-dot" style="background:var(--body-col)"></div>Body</div>
+  <div class="leg"><div class="leg-dot" style="background:var(--mind)"></div>Mind</div>
+  <div class="leg"><div class="leg-dot" style="background:var(--work)"></div>Work</div>
+  <div class="leg"><div class="leg-dot" style="background:#1E293B"></div>Rest</div>
+</div>
+
+<!-- ═══════════════════════════════
+     WORKDAY
+═══════════════════════════════ -->
+<div class="timeline-container">
+<div class="schedule-view active" id="view-work">
+
+  <div class="divider"><span class="divider-label">Night → Pre-Fajr</span><div class="divider-line"></div></div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">4:15<small>AM</small></div></div>
+    <div class="node nd-deen"></div>
+    <div class="card-col">
+      <div class="block-card acc-deen">
+        <div class="block-title">Wake — Wudu — Tahajjud</div>
+        <div class="block-desc">Phone in the other room. Rise, make wudu, stand in the dark. Pray as many raka'at as the time allows — minimum 4. Then sit in istighfar and du'a until Fajr enters. This is not productivity time — it is presence time.</div>
+        <div class="block-tags"><span class="tag zone-deen">Deen</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">4:15<small>AM</small></div></div>
+    <div class="node nd-deen"></div>
+    <div class="card-col">
+      <div class="block-card acc-deen">
+        <div class="block-title">Istighfar + Du'a until Fajr</div>
+        <div class="block-desc">After Tahajjud, remain in a state of remembrance. Istighfar, salawat, personal du'a. No phone, no input. The window between Tahajjud and Fajr is one of the most accepted times for du'a.</div>
+        <div class="block-tags"><span class="tag zone-deen">Deen</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><span class="divider-label">Fajr 5:20 → 5:55</span><div class="divider-line"></div></div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">5:20<small>AM</small></div></div>
+    <div class="node nd-deen"></div>
+    <div class="card-col">
+      <div class="block-card acc-deen">
+        <div class="block-title">Salat al-Fajr (Adhan → Iqamah → Salah)</div>
+        <div class="block-desc">Pray at the adhan. Two sunnah raka'at first, then the fard. Do not rush out of sajdah. The quality of this prayer sets the tone of the entire day.</div>
+        <div class="block-tags"><span class="tag zone-deen">Deen</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">5:40<small>AM</small></div></div>
+    <div class="node nd-deen"></div>
+    <div class="card-col">
+      <div class="block-card acc-deen">
+        <div class="block-title">Adhkar al-Sabah — Full, Not Rushed</div>
+        <div class="block-desc">Every du'a in full. No skipping. Adhkar al-sabah is the brain's spiritual firewall — it is not optional and it is not decorative. Finish by 5:55.</div>
+        <div class="block-tags"><span class="tag zone-deen">Deen</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><span class="divider-label">Qur'an Block 6:00 → 6:30</span><div class="divider-line"></div></div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">6:00<small>AM</small></div></div>
+    <div class="node nd-quran"></div>
+    <div class="card-col">
+      <div class="block-card acc-quran">
+        <div class="block-title">Muraja'ah — 3-Tier System (30 min)</div>
+        <div class="block-desc">Brain is at peak sharpness. World is silent. No phone has been touched yet. This is the most protected Qur'an block of the day — give it everything.</div>
+        <div class="tier-box">
+          <div class="tier">
+            <div class="tier-name">Tier 1 — Strong</div>
+            <div class="tier-desc">10 min · Rotation of mastered juz. Fluent pace, ears open.</div>
+          </div>
+          <div class="tier">
+            <div class="tier-name">Tier 2 — Weak</div>
+            <div class="tier-desc">13 min · Shaky juz — slow, deliberate, repeat to lock in.</div>
+          </div>
+          <div class="tier">
+            <div class="tier-name">Tier 3 — New</div>
+            <div class="tier-desc">7 min · Recent hifz consolidation. Small portions, multiple passes.</div>
+          </div>
+        </div>
+        <div class="block-tags" style="margin-top:8px"><span class="tag zone-quran">Qur'an</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><span class="divider-label">Prepare → Work</span><div class="divider-line"></div></div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">6:40<small>AM</small></div></div>
+    <div class="node nd-body"></div>
+    <div class="card-col">
+      <div class="block-card acc-body">
+        <div class="block-title">Sunlight + Water + Prepare</div>
+        <div class="block-desc">Step outside immediately — 10 min of morning light before anything else. First full glass of water. Then shower, dress, eat. Arrive at work already grounded, not scrambled.</div>
+        <div class="block-tags"><span class="tag zone-body">Body</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">7:30<small>AM</small></div></div>
+    <div class="node nd-work"></div>
+    <div class="card-col">
+      <div class="block-card acc-work">
+        <div class="block-title">Commute</div>
+        <div class="block-desc">Walk or short commute. Qur'an recitation audio or silence only. Not music, not scrolling. Arrive at work in a disciplined state.</div>
+        <div class="block-tags"><span class="tag zone-work">Commute</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><span class="divider-label">Work 8:00 AM → 4:00 PM</span><div class="divider-line"></div></div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">8:00<small>AM</small></div></div>
+    <div class="node nd-work"></div>
+    <div class="card-col">
+      <div class="block-card acc-work">
+        <div class="block-title">Al-Itqan Academy — Teaching</div>
+        <div class="block-desc">Full work block. Brain occupied, structure external. Dhuhr prayed on time — do not delay for any class or task. Asr prayed on time before leaving.</div>
+        <div class="block-tags"><span class="tag zone-work">Work</span><span class="tag zone-deen">Dhuhr · Asr</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><span class="divider-label">Post-Work → Rest (No Digital)</span><div class="divider-line"></div></div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">4:15<small>PM</small></div></div>
+    <div class="node nd-rest"></div>
+    <div class="card-col">
+      <div class="block-card acc-rest">
+        <div class="block-title">Return Home → Full Rest</div>
+        <div class="block-desc">No phone. No screen. No digital input of any kind. Eat, lie down, decompress. The body has been on since 4:15AM — it needs real recovery before the evening. This is not dead time, it is the fuel for everything after Maghrib.</div>
+        <div class="block-tags"><span class="tag zone-rest">Rest</span><span class="tag zone-rest">No Digital</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><span class="divider-label">Maghrib 6:30</span><div class="divider-line"></div></div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">6:30<small>PM</small></div></div>
+    <div class="node nd-deen"></div>
+    <div class="card-col">
+      <div class="block-card acc-deen">
+        <div class="block-title">Adhkar al-Masa' → Salat al-Maghrib</div>
+        <div class="block-desc">Full evening adhkar first, then pray Maghrib. This is the hard boundary between rest and the evening — the day's second firewall. Everything before this was preparation. Everything after is intentional.</div>
+        <div class="block-tags"><span class="tag zone-deen">Deen</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><span class="divider-label">Evening Programs</span><div class="divider-line"></div></div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">7:00<small>PM</small></div></div>
+    <div class="node nd-quran"></div>
+    <div class="card-col">
+      <div class="block-card acc-quran">
+        <div class="block-title">Second Muraja'ah Pass — Weak Juz (30 min)</div>
+        <div class="block-desc">Post-Maghrib, brain is rested and clear. Use this pass entirely on Tier 2 — the weak juz that need the most repetition. This is where the hifz gaps close over 30 days.</div>
+        <div class="block-tags"><span class="tag zone-quran">Qur'an</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">7:30<small>PM</small></div></div>
+    <div class="node nd-deen"></div>
+    <div class="card-col">
+      <div class="block-card acc-deen">
+        <div class="block-title">Salat al-Isha 7:50</div>
+        <div class="block-desc">Prepare and pray on time. After isha the evening deepens — protect what remains of it.</div>
+        <div class="block-tags"><span class="tag zone-deen">Deen</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">8:00<small>PM</small></div></div>
+    <div class="node nd-quran"></div>
+    <div class="card-col">
+      <div class="block-card acc-quran">
+        <div class="block-title">Tafseer Study — 45 Min</div>
+        <div class="block-desc">Deep work block — entirely Qur'an-centred. Open the tafseer of whatever you are reviewing in muraja'ah. Understand what you have memorised. Ibn Kathir, al-Sa'di, or al-Tabari. Pen and notebook. No screen unless necessary for reference.</div>
+        <div class="block-tags"><span class="tag zone-quran">Qur'an</span><span class="tag zone-mind">Tafseer</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">8:50<small>PM</small></div></div>
+    <div class="node nd-mind"></div>
+    <div class="card-col">
+      <div class="block-card acc-mind">
+        <div class="block-title">Qira'at Poetry Study — 20 Min</div>
+        <div class="block-desc">Sanad sequence — Tuhfat al-Atfal through Ash-Shatibiyyah. Memorise and understand new lines. Printed text, pen in hand. Everything revolves around the Qur'an.</div>
+        <div class="block-tags"><span class="tag zone-quran">Qur'an</span><span class="tag zone-mind">Qira'at</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">9:15<small>PM</small></div></div>
+    <div class="node nd-mind"></div>
+    <div class="card-col">
+      <div class="block-card acc-mind">
+        <div class="block-title">Journal — 10 Min Raw</div>
+        <div class="block-desc">What did you resist today? What held? What cracked? Name the cravings on paper — it removes their pull. Honest, not polished. Track the chain.</div>
+        <div class="block-tags"><span class="tag zone-mind">Mind</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">9:30<small>PM</small></div></div>
+    <div class="node nd-mind"></div>
+    <div class="card-col">
+      <div class="block-card acc-mind">
+        <div class="block-title">10 Min Intentional Silence</div>
+        <div class="block-desc">No input. No screen. Sit. The brain needs to produce its own signal — not beg for someone else's. Boredom here is recovery.</div>
+        <div class="block-tags"><span class="tag zone-mind">Mind</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><span class="divider-label">Wind Down</span><div class="divider-line"></div></div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">9:45<small>PM</small></div></div>
+    <div class="node nd-rest"></div>
+    <div class="card-col">
+      <div class="block-card acc-rest">
+        <div class="block-title">Social Media — 20 Min Only (Timer Set)</div>
+        <div class="block-desc">One window. Timer on. Google Family Link enforces the cutoff. When it ends, it ends — no negotiation. This is the only permitted digital consumption of the day.</div>
+        <div class="block-tags"><span class="tag zone-work">Digital</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">10:05<small>PM</small></div></div>
+    <div class="node nd-sleep"></div>
+    <div class="card-col">
+      <div class="block-card acc-sleep">
+        <div class="block-title">Phone to Charger — Other Room</div>
+        <div class="block-desc">Phone leaves the bedroom. Basic alarm set. Lights dim. Brain begins melatonin production when stimulation stops. This single act eliminates most late-night relapse.</div>
+        <div class="block-tags"><span class="tag zone-sleep">Sleep Prep</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">10:30<small>PM</small></div></div>
+    <div class="node nd-sleep"></div>
+    <div class="card-col">
+      <div class="block-card acc-sleep">
+        <div class="block-title">Sleep — Hard Cutoff</div>
+        <div class="block-desc">Not "around 11." 10:30. That is 5h 45min to Tahajjud at 4:15. Consistent sleep time is as critical as consistent wake time — the brain runs on rhythm, not willpower.</div>
+        <div class="block-tags"><span class="tag zone-sleep">Sleep</span></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /workday -->
+
+<!-- ═══════════════════════════════
+     OFF-DAY (Thu & Fri)
+═══════════════════════════════ -->
+<div class="schedule-view" id="view-off">
+
+  <div class="divider"><span class="divider-label">Night → Pre-Fajr</span><div class="divider-line"></div></div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">4:15<small>AM</small></div></div>
+    <div class="node nd-deen"></div>
+    <div class="card-col">
+      <div class="block-card acc-deen">
+        <div class="block-title">Wake — Tahajjud Extended (6–8 Rak'at)</div>
+        <div class="block-desc">No work forces you up today — your niyyah does. This is where character is built. Anyone can rise when they have to. Rising when nothing demands it is the real discipline.</div>
+        <div class="block-tags"><span class="tag zone-deen">Deen</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">5:00<small>AM</small></div></div>
+    <div class="node nd-deen"></div>
+    <div class="card-col">
+      <div class="block-card acc-deen">
+        <div class="block-title">Istighfar + Du'a until Fajr</div>
+        <div class="block-desc">After Tahajjud — sit in full presence. Istighfar, salawat, personal du'a. The last third of the night ends at Fajr. Do not waste a moment of it on a screen.</div>
+        <div class="block-tags"><span class="tag zone-deen">Deen</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><span class="divider-label">Fajr 5:20 → 5:55</span><div class="divider-line"></div></div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">5:20<small>AM</small></div></div>
+    <div class="node nd-deen"></div>
+    <div class="card-col">
+      <div class="block-card acc-deen">
+        <div class="block-title">Salat al-Fajr</div>
+        <div class="block-desc">Sunnah raka'at then fard. Pray with presence — no rush. The off-day Fajr is the most important one to protect because nothing external enforces it.</div>
+        <div class="block-tags"><span class="tag zone-deen">Deen</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">5:40<small>AM</small></div></div>
+    <div class="node nd-deen"></div>
+    <div class="card-col">
+      <div class="block-card acc-deen">
+        <div class="block-title">Adhkar al-Sabah — Full</div>
+        <div class="block-desc">Same as every day. No off-day exception. The chain applies here most of all. Finish by 5:55.</div>
+        <div class="block-tags"><span class="tag zone-deen">Deen</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><span class="divider-label">Qur'an Block 6:00 → 7:00</span><div class="divider-line"></div></div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">6:00<small>AM</small></div></div>
+    <div class="node nd-quran"></div>
+    <div class="card-col">
+      <div class="block-card acc-quran">
+        <div class="block-title">Muraja'ah — Full 3-Tier System (60 min)</div>
+        <div class="block-desc">Off-days give you the full hour. Run all three tiers properly — don't skim Tier 1 and feel done. This is the deepest Qur'an work of the week.</div>
+        <div class="tier-box">
+          <div class="tier">
+            <div class="tier-name">Tier 1 — Strong</div>
+            <div class="tier-desc">20 min · Full rotation. Fluent pace, ears fully open for errors.</div>
+          </div>
+          <div class="tier">
+            <div class="tier-name">Tier 2 — Weak</div>
+            <div class="tier-desc">25 min · Intensive. Repeat problem passages until they break open.</div>
+          </div>
+          <div class="tier">
+            <div class="tier-name">Tier 3 — New</div>
+            <div class="tier-desc">15 min · New hifz consolidation. Slow, deliberate, locked in.</div>
+          </div>
+        </div>
+        <div class="block-tags" style="margin-top:8px"><span class="tag zone-quran">Qur'an</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><span class="divider-label">Morning Programs 7:00 →</span><div class="divider-line"></div></div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">7:00<small>AM</small></div></div>
+    <div class="node nd-body"></div>
+    <div class="card-col">
+      <div class="block-card acc-body">
+        <div class="block-title">Sunlight + Long Walk (45 min)</div>
+        <div class="block-desc">Step outside. No headphones or Qur'an audio only — no podcasts, no music. The brain needs unstructured movement to detox. Walk and think. Nothing else.</div>
+        <div class="block-tags"><span class="tag zone-body">Body</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">7:50<small>AM</small></div></div>
+    <div class="node nd-quran"></div>
+    <div class="card-col">
+      <div class="block-card acc-quran">
+        <div class="block-title">Qira'at Deep Study — 60 Min</div>
+        <div class="block-desc">Advance your Sanad sequence. Memorise and understand new lines of Tuhfat al-Atfal through Ash-Shatibiyyah. Printed text, pen, notes. Off-days are for the depth that workdays can't hold.</div>
+        <div class="block-tags"><span class="tag zone-quran">Qur'an</span><span class="tag zone-mind">Qira'at</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">9:00<small>AM</small></div></div>
+    <div class="node nd-mind"></div>
+    <div class="card-col">
+      <div class="block-card acc-mind">
+        <div class="block-title">Journal + Weekly Review — 20 Min</div>
+        <div class="block-desc">Review the whole week. Which days held? Where did the chain crack? What caused it exactly? Name it. Plan the fix for next week. Honest, not polished.</div>
+        <div class="block-tags"><span class="tag zone-mind">Mind</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">9:25<small>AM</small></div></div>
+    <div class="node nd-body"></div>
+    <div class="card-col">
+      <div class="block-card acc-body">
+        <div class="block-title">Eat + Personal Admin + Free Time</div>
+        <div class="block-desc">Breakfast, errands, household, face-to-face conversations. Free time — but not screen time. The brain gets real rest, not more dopamine. No social media outside its evening window.</div>
+        <div class="block-tags"><span class="tag zone-body">Body</span><span class="tag zone-rest">No Digital</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><span class="divider-label">Dhuhr 12:45 → 1:30</span><div class="divider-line"></div></div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">12:45<small>PM</small></div></div>
+    <div class="node nd-deen"></div>
+    <div class="card-col">
+      <div class="block-card acc-deen">
+        <div class="block-title">Salat al-Dhuhr + Qailulah (20 min max)</div>
+        <div class="block-desc">Pray Dhuhr on time. Then the Sunnah nap — hard 20-minute cap. Set a timer before you close your eyes. Longer than 20 min and tonight's sleep is compromised.</div>
+        <div class="block-tags"><span class="tag zone-deen">Deen</span><span class="tag zone-body">Body</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">1:30<small>PM</small></div></div>
+    <div class="node nd-quran"></div>
+    <div class="card-col">
+      <div class="block-card acc-quran">
+        <div class="block-title">Lunch → Tafseer Deep Study — 2 Hours</div>
+        <div class="block-desc">Eat first (until 2:00), then the biggest deep work block of the week. Full tafseer study — Ibn Kathir, al-Sa'di, or al-Tabari on the juz you are currently reviewing. Pen, notebook, phone in another room. This is your most productive window of the week.</div>
+        <div class="block-tags"><span class="tag zone-quran">Qur'an</span><span class="tag zone-mind">Tafseer</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><span class="divider-label">Asr 4:00 → 4:40</span><div class="divider-line"></div></div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">4:00<small>PM</small></div></div>
+    <div class="node nd-deen"></div>
+    <div class="card-col">
+      <div class="block-card acc-deen">
+        <div class="block-title">Salat al-Asr</div>
+        <div class="block-desc">On time. After salah — full adhkar al-masa'. Do not delay or skip the evening adhkar. It is the second spiritual firewall of the day.</div>
+        <div class="block-tags"><span class="tag zone-deen">Deen</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">4:40<small>PM</small></div></div>
+    <div class="node nd-rest"></div>
+    <div class="card-col">
+      <div class="block-card acc-rest">
+        <div class="block-title">Rest Before Maghrib — No Digital</div>
+        <div class="block-desc">From Asr until Maghrib: rest only. No phone, no screen, no digital input. Decompress, have tea, sit outside, speak to people around you. The brain needs this buffer before the evening programs.</div>
+        <div class="block-tags"><span class="tag zone-rest">Rest</span><span class="tag zone-rest">No Digital</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><span class="divider-label">Maghrib 6:30</span><div class="divider-line"></div></div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">6:30<small>PM</small></div></div>
+    <div class="node nd-deen"></div>
+    <div class="card-col">
+      <div class="block-card acc-deen">
+        <div class="block-title">Adhkar al-Masa' → Salat al-Maghrib</div>
+        <div class="block-desc">Full evening adhkar, then pray. Hard boundary — the evening programs begin from here with a clean, rested, spiritually anchored state.</div>
+        <div class="block-tags"><span class="tag zone-deen">Deen</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><span class="divider-label">Evening Programs</span><div class="divider-line"></div></div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">7:00<small>PM</small></div></div>
+    <div class="node nd-quran"></div>
+    <div class="card-col">
+      <div class="block-card acc-quran">
+        <div class="block-title">Third Muraja'ah Pass — Weak Juz (30 min)</div>
+        <div class="block-desc">Off-days earn a third muraja'ah pass. Use it entirely on Tier 2 — the weak juz. This is the session where gaps close over the 30 days. Slow, deliberate, repeated.</div>
+        <div class="block-tags"><span class="tag zone-quran">Qur'an</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">7:30<small>PM</small></div></div>
+    <div class="node nd-deen"></div>
+    <div class="card-col">
+      <div class="block-card acc-deen">
+        <div class="block-title">Salat al-Isha 7:50</div>
+        <div class="block-desc">Prepare and pray on time. Wind down begins after this — protect the remainder of the night.</div>
+        <div class="block-tags"><span class="tag zone-deen">Deen</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">8:00<small>PM</small></div></div>
+    <div class="node nd-quran"></div>
+    <div class="card-col">
+      <div class="block-card acc-quran">
+        <div class="block-title">Tafseer Continuation — 45 Min</div>
+        <div class="block-desc">Continue where you left off in the afternoon session. The off-day gives you the unique gift of two tafseer sessions — morning depth and evening consolidation. Use both.</div>
+        <div class="block-tags"><span class="tag zone-quran">Qur'an</span><span class="tag zone-mind">Tafseer</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">8:50<small>PM</small></div></div>
+    <div class="node nd-mind"></div>
+    <div class="card-col">
+      <div class="block-card acc-mind">
+        <div class="block-title">10 Min Intentional Silence</div>
+        <div class="block-desc">No input. No screen. Sit. Off-days carry the highest risk of dopamine collapse in the evening — this block is the guard.</div>
+        <div class="block-tags"><span class="tag zone-mind">Mind</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><span class="divider-label">Wind Down</span><div class="divider-line"></div></div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">9:05<small>PM</small></div></div>
+    <div class="node nd-rest"></div>
+    <div class="card-col">
+      <div class="block-card acc-rest">
+        <div class="block-title">Social Media — 20 Min Only (Timer Set)</div>
+        <div class="block-desc">Same window as workdays. The brain does not know it is Thursday. Timer on, Family Link enforces it. When it ends, phone goes to the other room.</div>
+        <div class="block-tags"><span class="tag zone-work">Digital</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">9:30<small>PM</small></div></div>
+    <div class="node nd-sleep"></div>
+    <div class="card-col">
+      <div class="block-card acc-sleep">
+        <div class="block-title">Phone to Charger → Wind Down</div>
+        <div class="block-desc">Phone out of the bedroom. Lights dim. Brain begins recovery. The off-day ends the same way it began — in discipline, not drift.</div>
+        <div class="block-tags"><span class="tag zone-sleep">Sleep Prep</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="time-col"><div class="time-label">10:00<small>PM</small></div></div>
+    <div class="node nd-sleep"></div>
+    <div class="card-col">
+      <div class="block-card acc-sleep">
+        <div class="block-title">Sleep — Same Cutoff as Workdays</div>
+        <div class="block-desc">The biggest off-day trap is sleeping late because there is no work tomorrow. That collapses Tahajjud, shifts Fajr, and breaks the chain. Same cutoff. Every night without exception.</div>
+        <div class="block-tags"><span class="tag zone-sleep">Sleep</span></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /off-day -->
+</div><!-- /timeline container -->
+
+<div class="quote">
+  <div class="quote-ar">وَمَن جَاهَدَ فَإِنَّمَا يُجَاهِدُ لِنَفْسِهِ</div>
+  <div class="quote-en">"And whoever strives, strives only for himself." — Al-Ankabut: 6</div>
+</div>
+
+<script>
+  function show(type) {
+    document.getElementById('view-work').classList.toggle('active', type === 'work');
+    document.getElementById('view-off').classList.toggle('active', type === 'off');
+    document.getElementById('btnWork').className = 'toggle-btn' + (type === 'work' ? ' active-work' : '');
+    document.getElementById('btnOff').className  = 'toggle-btn' + (type === 'off'  ? ' active-off'  : '');
+  }
+</script>
+</body>
+</html>
