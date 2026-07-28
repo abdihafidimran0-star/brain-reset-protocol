@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brain Reset Protocol</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #0C0F14;
+    --surface:  #131820;
+    --border:   #1E2530;
+    --gold:     #C9A84C;
+    --gold-dim: #7A6328;
+    --gold-glow:rgba(201,168,76,0.10);
+    --quran:    #8B5CF6;
+    --text:     #E8EDF3;
+    --muted:    #6B7685;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px 60px;
+  }
+
+  /* glow background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 30% 20%, rgba(201,168,76,0.05) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 70% 80%, rgba(139,92,246,0.05) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .wrap {
+    width: 100%;
+    max-width: 480px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* top badge */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    border: 1px solid var(--gold-dim);
+    border-radius: 100px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: var(--gold-glow);
+    margin-bottom: 20px;
+  }
+
+  /* heading */
+  .hero {
+    margin-bottom: 10px;
+  }
+  .hero h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(30px, 8vw, 48px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    color: var(--text);
+  }
+  .hero h1 span { color: var(--gold); }
+  .hero p {
+    margin-top: 12px;
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.65;
+    max-width: 400px;
+  }
+
+  /* deadline */
+  .deadline {
+    margin: 18px 0 32px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .deadline-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .deadline-label {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* app cards */
+  .cards {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 36px;
+  }
+
+  .card {
+    display: block;
+    text-decoration: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 20px;
+    transition: border-color 0.2s, transform 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+  }
+  .card-gold::before  { background: radial-gradient(ellipse 80% 60% at 0% 50%, rgba(201,168,76,0.07), transparent); }
+  .card-quran::before { background: radial-gradient(ellipse 80% 60% at 0% 50%, rgba(139,92,246,0.07), transparent); }
+  .card:hover::before { opacity: 1; }
+  .card-gold  { border-left: 3px solid var(--gold); }
+  .card-quran { border-left: 3px solid var(--quran); }
+  .card-gold:hover  { border-color: var(--gold); }
+  .card-quran:hover { border-color: var(--quran); }
+
+  .card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .card-icon {
+    font-size: 26px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .card-arrow {
+    font-size: 18px;
+    color: var(--muted);
+    flex-shrink: 0;
+    margin-top: 3px;
+    transition: color 0.2s, transform 0.2s;
+  }
+  .card:hover .card-arrow {
+    transform: translateX(3px);
+  }
+  .card-gold:hover  .card-arrow { color: var(--gold); }
+  .card-quran:hover .card-arrow { color: var(--quran); }
+
+  .card-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 5px;
+    letter-spacing: -0.01em;
+  }
+  .card-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 12px;
+  }
+  .tag {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .tg  { background: rgba(201,168,76,0.10); border: 1px solid rgba(201,168,76,0.2);  color: var(--gold); }
+  .tq  { background: rgba(139,92,246,0.10); border: 1px solid rgba(139,92,246,0.2);  color: var(--quran); }
+  .tb  { background: rgba(16,185,129,0.10); border: 1px solid rgba(16,185,129,0.2);  color: #10B981; }
+  .tm  { background: rgba(59,130,246,0.10); border: 1px solid rgba(59,130,246,0.2);  color: #3B82F6; }
+
+  /* stats row */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 36px;
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 12px;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+
+  /* quote */
+  .quote {
+    text-align: center;
+    padding-top: 4px;
+  }
+  .quote-ar {
+    font-size: 17px;
+    color: var(--gold);
+    line-height: 1.9;
+    margin-bottom: 6px;
+  }
+  .quote-en {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="badge">⚡ Abdixafid · Personal System</div>
+
+  <div class="hero">
+    <h1>Brain <span>Reset</span><br>Protocol</h1>
+    <p>A 30-day Qur'an-centred system to reclaim focus, discipline, and presence. Built to be unbreakable.</p>
+  </div>
+
+  <div class="deadline">
+    <div class="deadline-line"></div>
+    <div class="deadline-label">Deadline: End of August 2026</div>
+    <div class="deadline-line"></div>
+  </div>
+
+  <div class="cards">
+
+    <a class="card card-gold" href="detox-protocol.html">
+      <div class="card-top">
+        <div class="card-icon">🔒</div>
+        <div class="card-arrow">→</div>
+      </div>
+      <div class="card-title">30-Day Detox Protocol</div>
+      <div class="card-desc">17 non-negotiable daily acts across Deen, Body, Mind, and Digital. The unbreakable chain — miss one day, start from zero. Includes the 30-day tracker.</div>
+      <div class="card-tags">
+        <span class="tag tg">Deen</span>
+        <span class="tag tb">Body</span>
+        <span class="tag tm">Mind</span>
+        <span class="tag tg">Digital</span>
+        <span class="tag tg">Day Tracker</span>
+      </div>
+    </a>
+
+    <a class="card card-quran" href="daily-schedule.html">
+      <div class="card-top">
+        <div class="card-icon">📖</div>
+        <div class="card-arrow">→</div>
+      </div>
+      <div class="card-title">Daily Schedule</div>
+      <div class="card-desc">Hour-by-hour timeline for both Workdays and Off-days. 3-tier muraja'ah system, Tafseer deep work, Qira'at study, prayer times, rest blocks, and wind-down — everything around the Qur'an.</div>
+      <div class="card-tags">
+        <span class="tag tq">Muraja'ah</span>
+        <span class="tag tq">Tafseer</span>
+        <span class="tag tq">Qira'at</span>
+        <span class="tag tg">Workday</span>
+        <span class="tag tg">Off-Day</span>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-num">30</div>
+      <div class="stat-label">Days</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">17</div>
+      <div class="stat-label">Daily Acts</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">3</div>
+      <div class="stat-label">Muraja'ah Tiers</div>
+    </div>
+  </div>
+
+  <div class="quote">
+    <div class="quote-ar">إِنَّ اللَّهَ لَا يُغَيِّرُ مَا بِقَوْمٍ حَتَّى يُغَيِّرُوا مَا بِأَنفُسِهِمْ</div>
+    <div class="quote-en">"Indeed, Allah will not change the condition of a people until they change what is in themselves." — Ar-Ra'd: 11</div>
+  </div>
+
+</div>
+</body>
+</html>
